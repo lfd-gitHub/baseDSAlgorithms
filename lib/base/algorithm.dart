@@ -1,3 +1,6 @@
+///
+///
+///
 abstract class IAlgorithmFind {
   Future<int> find(List<num> datas, num target, [StepCallBack? callBack]);
 }
