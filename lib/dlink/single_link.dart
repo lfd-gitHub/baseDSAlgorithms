@@ -32,7 +32,7 @@ class SingleLink<T> with Iterator<T> {
   @override
   T get current {
     if (_currentNode == null) {
-      throw Exception("out of range");
+      throw "out of range";
     }
     T value = _currentNode!.value()!;
     _currentNode = _currentNode!.next;
@@ -46,7 +46,7 @@ class SingleLink<T> with Iterator<T> {
 
   T getAt(int index) {
     if (index > size) {
-      throw Exception("index out of range");
+      throw "index out of range";
     }
     var current = _root;
     int _index = 0;
@@ -55,12 +55,12 @@ class SingleLink<T> with Iterator<T> {
       current = current.next;
       _index++;
     }
-    throw Exception("index out of range");
+    throw "index out of range";
   }
 
   void insertAt(int index, T data) {
     if (index > size) {
-      throw Exception("index out of range");
+      throw "index out of range";
     }
     if (index == size) {
       append(data);
@@ -103,7 +103,7 @@ class SingleLink<T> with Iterator<T> {
       }
     }
 
-    throw Exception("not found");
+    throw "not found";
   }
 
   void show() {
@@ -155,6 +155,8 @@ void main() {
   while (it.moveNext()) {
     print("it next => ${it.current}");
   }
+
+  it.current;
 }
 
 class SNode<D> {

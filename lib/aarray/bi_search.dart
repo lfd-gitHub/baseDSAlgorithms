@@ -5,7 +5,7 @@ import 'package:jdsaa/base/algorithm.dart';
 class BiSearch implements IAlgorithmFind {
   @override
   Future<int> find(List<num> datas, num target, [StepCallBack? callBack]) async {
-    if (datas.isEmpty == true) return Future.value(-1);
+    if (datas.isEmpty == true) return -1;
     int idxBegin = 0;
     int idxEnd = datas.length - 1;
     int idxCenter = (idxEnd + idxBegin) ~/ 2;
@@ -14,7 +14,7 @@ class BiSearch implements IAlgorithmFind {
       await callBack?.call(AStep(idxs: [idxBegin, idxCenter, idxEnd]));
       var cData = datas[idxCenter];
       if (cData == target) {
-        return Future.value(idxCenter);
+        return idxCenter;
       }
       if (cData > target) {
         idxEnd = idxCenter - 1;
@@ -22,7 +22,7 @@ class BiSearch implements IAlgorithmFind {
         idxBegin = idxCenter + 1;
       }
       if (idxBegin > idxEnd) {
-        return Future.value(-1);
+        return -1;
       }
       idxCenter = (idxEnd + idxBegin) ~/ 2;
     }

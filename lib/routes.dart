@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jdsaa/views/anims/index.dart';
+import 'package:jdsaa/views/anims/anim_hanoi.dart';
+import 'package:jdsaa/views/anims/anim_index.dart';
 import 'package:jdsaa/views/home.dart';
 
 typedef RouteBuilder = Widget Function(BuildContext context, [dynamic args]);
@@ -7,10 +8,12 @@ typedef RouteBuilder = Widget Function(BuildContext context, [dynamic args]);
 class Routes {
   static const String home = "/home";
   static const String animsIndex = "/anims/index";
+  static const String animsHanoi = "/anims/hanoi";
 
   static final routes = <String, RouteBuilder>{
     home: (_, [args]) => const HomePage(),
     animsIndex: (ctx, [args]) => AnimIndexPage(datas: args),
+    animsHanoi: (ctx, [args]) => const AnimHanoiPage(),
   };
 
   static Route onGenerateRoute(RouteSettings settings) {

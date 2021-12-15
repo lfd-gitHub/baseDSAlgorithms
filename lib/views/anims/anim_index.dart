@@ -29,7 +29,7 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
 
   double findWhat = 0;
 
-  final StreamController<AStep> _stepStream = StreamController.broadcast();
+  final StreamController<AStep> _stepStream = StreamController();
 
   Stream<AStep> stepStream() {
     return _stepStream.stream;

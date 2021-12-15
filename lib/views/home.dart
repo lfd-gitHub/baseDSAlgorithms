@@ -15,10 +15,14 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(title: const Text("DataStructures And Algorithms")),
       body: ListView(children: [
         ListTile(
-          title: const Text("Show Anims"),
+          title: const Text("Show Index Anim"),
           onTap: () => Navigator.pushNamed(context, Routes.animsIndex, arguments: List.generate(20, (index) => index + 10)),
         ),
-        const Divider()
+        const Divider(),
+        ListTile(
+          title: const Text("Show Hanoi Anim"),
+          onTap: () => Navigator.pushNamed(context, Routes.animsHanoi),
+        ),
       ]),
       floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.animation),
