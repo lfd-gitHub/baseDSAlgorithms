@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
-
+import 'package:rxdart/rxdart.dart';
 import 'package:flutter/material.dart';
 import 'package:jdsaa/erecursion/hanoi.dart';
 
@@ -50,13 +50,13 @@ class _AnimHanoiState extends State<AnimHanoiPage> {
       ..elementAt(0).addAll(List.generate(count, (index) => index + 1));
   }
 
+  HanoiStep? step;
+
   void move(HanoiStep s) async {
-    int aChar = 'A'.codeUnits.first;
-    int idxFrom = s.from.codeUnits.first - aChar;
-    int idxTo = s.to.codeUnits.first - aChar;
-    log("[AHanoi] pre $idxFrom -> $idxTo | ${s.to} | $s | $hanoiDisks");
-    int idxWhat = hanoiDisks[idxFrom].removeAt(0);
-    hanoiDisks[idxTo].insert(0, idxWhat);
+    log("$hanoiDisks");
+    int idxWhat = hanoiDisks[s.pFrom].removeAt(0);
+    hanoiDisks[s.pTo].insert(0, idxWhat);
+    step = s;
     log("[AHanoi] move change - $hanoiDisks");
     setState(() {});
   }
@@ -68,7 +68,7 @@ class _AnimHanoiState extends State<AnimHanoiPage> {
     if (subscription == null) {
       reset();
       stream = hanoi(count, 'A', 'B', 'C');
-      subscription = stream?.asBroadcastStream().listen(move, onDone: close, onError: (e) {
+      subscription = stream?.interval(const Duration(seconds: 1)).listen(move, onDone: close, onError: (e) {
         close();
       }, cancelOnError: true);
     } else {
@@ -141,7 +141,7 @@ class _AnimHanoiState extends State<AnimHanoiPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisAlignment: MainAxisAlignment.end,
-                            children: hanoiDisks[i].map((e) => _buildDisk(e)).toList(),
+                            children: hanoiDisks[i].map((e) => _buildDisk(i, e, box, pillerTop)).toList(),
                           ),
                         )
                       ],
@@ -155,25 +155,48 @@ class _AnimHanoiState extends State<AnimHanoiPage> {
     );
   }
 
-  Widget _buildDisk(int lev) {
+  final dur = const Duration(milliseconds: 500);
+
+  Widget _buildDisk(int pillar, int lev, BoxConstraints drawBox, double pillerTop) {
+    var disW = lev * diskIncreUnit + diskMinWidth;
     var child = Container(
       key: ValueKey(lev),
       color: colors[lev % colors.length],
-      width: lev * diskIncreUnit + diskMinWidth,
+      width: disW,
       height: diskHeight,
       child: Center(child: Text("$lev", textAlign: TextAlign.center, style: const TextStyle(color: Colors.white))),
     );
 
-    // return AnimatedSwitcher(
-    //     duration: const Duration(seconds: 1),
-    //     transitionBuilder: (child, anim) {
-    //       log("[AHanoi] ck = ${child.key}");
-    //       return SlideTransition(
-    //         position: anim.drive(Tween(begin: Offset(0, -1), end: Offset(0, 0))),
-    //         child: child,
-    //       );
-    //     },
-    //     child: child);
+    if (step?.pTo == pillar && step?.dIndex == lev) {
+      //var pillarHeight = drawBox.maxHeight - pillerTop;
+      double spacePerPfly = drawBox.maxWidth / 3;
+      double spaceFlyX = spacePerPfly * (step!.pTo - step!.pFrom);
+      double spaceFlyYFrom = diskHeight * hanoiDisks[step!.pFrom].length;
+
+      log("[AHanoi][Disk] sf = $spaceFlyX | $spaceFlyYFrom");
+
+      return TweenAnimationBuilder(
+          duration: dur,
+          tween: Tween(begin: Offset(-spaceFlyX, -spaceFlyYFrom), end: const Offset(0, 0)),
+          builder: (ctx, Offset offset, child) {
+            //Offset offset;
+
+            // if (value <= 0.5) {
+            //   offset = Tween(begin: Offset(-spaceFlyX, -spaceFlyYFrom), end: Offset(-spaceFlyX, -pillarHeight)).transform(
+            //     const Interval(0, 0.5).transform(value),
+            //   );
+            // } else {
+            //   offset = Tween(begin: Offset(-spaceFlyX, -pillarHeight), end: const Offset(0, 0)).transform(
+            //     const Interval(0.5, 1).transform(value),
+            //   );
+            // }
+            return Transform.translate(
+              offset: offset,
+              child: child,
+            );
+          },
+          child: child);
+    }
     return child;
   }
 }

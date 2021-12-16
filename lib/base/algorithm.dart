@@ -1,25 +1,21 @@
 ///
 ///
 ///
-abstract class IAlgorithmFind {
-  Future<int> find(List<num> datas, num target, [StepCallBack? callBack]);
+abstract class IAlgorithm {
+  Stream<AStep> find(List<num> datas, num target) => throw 'not implement';
+  Stream<AStep> sort(List<num> datas) => throw 'not implement';
 }
-
-typedef StepCallBack = Future<void> Function(AStep step);
 
 class AStep {
   AStepType type;
-  List<int> idxs;
+  List<int>? idxs;
   bool isExchagne;
+  dynamic value;
 
-  AStep({
-    this.type = AStepType.find,
-    required this.idxs,
-    this.isExchagne = false,
-  });
+  AStep({this.type = AStepType.find, this.idxs, this.isExchagne = false, this.value});
 
   @override
-  String toString() => 'AStep(idxs: $idxs, isExchagne: $isExchagne)';
+  String toString() => 'AStep(type: $type ,idxs: $idxs, isExchagne: $isExchagne, value: $value)';
 }
 
-enum AStepType { find, exchange }
+enum AStepType { find, exchange, result }

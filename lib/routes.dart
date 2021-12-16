@@ -12,7 +12,7 @@ class Routes {
 
   static final routes = <String, RouteBuilder>{
     home: (_, [args]) => const HomePage(),
-    animsIndex: (ctx, [args]) => AnimIndexPage(datas: args),
+    animsIndex: (ctx, [args]) => const AnimIndexPage(),
     animsHanoi: (ctx, [args]) => const AnimHanoiPage(),
   };
 

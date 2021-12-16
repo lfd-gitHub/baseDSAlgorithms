@@ -8,9 +8,11 @@ class AnimPillar extends StatelessWidget {
   final bool isRightIn;
   final bool isTopIn;
   final double interval;
+  final Duration duration;
 
   const AnimPillar({
     Key? key,
+    this.duration = const Duration(seconds: 1),
     this.color = Colors.blue,
     this.heightFrom = 100,
     this.heightTo = 100,
@@ -22,34 +24,51 @@ class AnimPillar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double diff = heightFrom - heightTo;
+    //log("[Pillar] $key | $heightFrom $heightTo diff = $diff   ?$isTopIn");
+
     return SizedBox(
       width: width,
       height: heightFrom > heightTo ? heightFrom : heightTo,
       child: TweenAnimationBuilder(
-          duration: const Duration(seconds: 1),
+          duration: duration,
           tween: Tween(begin: 0.0, end: 1.0),
           curve: Interval(interval, 1, curve: Curves.bounceOut),
           builder: (context, double value, child) {
-            double top = 0;
+            double topFrom = 0;
+            double topTo = 0;
             double left1 = 0;
             double left2 = 0;
-            if (isTopIn) top = heightFrom - value * heightFrom;
+            Color cf = color;
+            Color ct = color;
+            if (isTopIn) {
+              topFrom = heightFrom - value * heightFrom;
+              topTo = heightTo - value * heightTo;
+            } else {
+              if (diff < 0) {
+                topFrom = -diff;
+              } else {
+                topTo = diff;
+              }
+            }
             if (!isTopIn) {
               left1 = isRightIn ? -width * value : width * value;
               left2 = isRightIn ? -width + width * value : width - width * value;
+              cf = isRightIn ? Colors.pink.shade200 : Colors.orange.shade200;
+              ct = isRightIn ? Colors.orange.shade200 : Colors.pink.shade200;
             }
 
             Widget from = Positioned(
               left: left1,
-              top: top,
-              child: Container(color: color, width: width, height: heightFrom),
+              top: topFrom,
+              child: Container(color: cf, width: width, height: heightFrom),
             );
 
             Widget to = Positioned(
               left: left2,
-              top: top,
+              top: topTo,
               child: Container(
-                color: color,
+                color: ct,
                 width: width,
                 height: heightTo,
               ),

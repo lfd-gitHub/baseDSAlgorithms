@@ -4,7 +4,6 @@
 
 Stream<HanoiStep> hanoi(int count, String from, String by, String to) async* {
   if (count <= 1) {
-    await Future.delayed(const Duration(seconds: 1));
     yield HanoiStep(count, from, to);
     return;
   }
@@ -12,7 +11,6 @@ Stream<HanoiStep> hanoi(int count, String from, String by, String to) async* {
   //非最后一个都移到第二个柱子上
   yield* hanoi(count - 1, from, to, by);
 
-  await Future.delayed(const Duration(seconds: 1));
   //最后一个移动到第三个柱子上
   yield HanoiStep(count, from, to);
 
@@ -20,15 +18,21 @@ Stream<HanoiStep> hanoi(int count, String from, String by, String to) async* {
   yield* hanoi(count - 1, by, from, to);
 }
 
-class HanoiStep {
-  int index;
-  String from;
-  String to;
+int aChar = 'A'.codeUnits.first;
 
-  HanoiStep(this.index, this.from, this.to);
+class HanoiStep {
+  late int dIndex;
+  late int pFrom;
+  late int pTo;
+
+  HanoiStep(int index, String sPfrom, String sPto) {
+    dIndex = index;
+    pFrom = sPfrom.codeUnits[0] - aChar;
+    pTo = sPto.codeUnits[0] - aChar;
+  }
 
   @override
-  String toString() => 'HanoiStep(index: $index, from: $from, to: $to)';
+  String toString() => 'HanoiStep(index: $dIndex, from: $pFrom, to: $pTo)';
 }
 
 void main(List<String> args) {
