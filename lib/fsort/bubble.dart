@@ -7,6 +7,7 @@ class BubbleSort with IAlgorithm {
 
   factory BubbleSort() => _singleton;
 
+  ///
   @override
   Stream<AStep> sort(List<num> datas) async* {
     List<num> copy = List.of(datas);

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:jdsaa/aarray/bi_search.dart';
 import 'package:jdsaa/base/algorithm.dart';
 import 'package:jdsaa/fsort/bubble.dart';
+import 'package:jdsaa/fsort/quick.dart';
 import 'package:jdsaa/views/widgets/anim_pillar.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -23,9 +24,11 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
   num maxValue = 0;
   num minValue = 0;
   AStep? aStep;
+  final pillarDuration = const Duration(milliseconds: 100);
+  final stepDuration = const Duration(milliseconds: 200);
 
   double findWhat = 0;
-  List<String> supportAlgor = [(BiSearch).toString(), (BubbleSort).toString()];
+  List<String> supportAlgor = [(BiSearch).toString(), (BubbleSort).toString(), (QuickSort).toString()];
 
   StreamSubscription? _stepStreamSub;
 
@@ -49,6 +52,9 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
 
   void startAnim() {
     switch (supportAlgor[menuAlgorIdx]) {
+      case 'QuickSort':
+        _quickSort();
+        break;
       case 'BubbleSort':
         _bubbleSort();
         break;
@@ -60,10 +66,31 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
     }
   }
 
+  void _quickSort() {
+    _stepStreamSub?.cancel();
+    Stream<AStep> steps = QuickSort().sortRange(List.of(datas), 0, datas.length - 1);
+    _stepStreamSub = steps.interval(stepDuration).listen((event) {
+      setState(() {
+        log("[Sort][refresh] $event");
+        aStep = event;
+        if (aStep?.isExchagne == true) {
+          int from = aStep!.idxs![0];
+          int to = aStep!.idxs![1];
+          var temp = datas[from];
+          datas[from] = datas[to];
+          datas[to] = temp;
+        }
+        if (aStep?.type == AStepType.update) {
+          datas[aStep!.idxs![0]] = aStep!.value;
+        }
+      });
+    });
+  }
+
   void _bubbleSort() {
     _stepStreamSub?.cancel();
     Stream<AStep> steps = BubbleSort().sort(datas);
-    _stepStreamSub = steps.interval(const Duration(milliseconds: 1000)).listen((event) {
+    _stepStreamSub = steps.interval(stepDuration).listen((event) {
       setState(() {
         log("[Sort][refresh] $event");
         aStep = event;
@@ -83,7 +110,7 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
   void _biFind() {
     _stepStreamSub?.cancel();
     Stream<AStep> steps = BiSearch().find(datas, findWhat);
-    _stepStreamSub = steps.interval(const Duration(seconds: 1)).listen((event) {
+    _stepStreamSub = steps.interval(stepDuration).listen((event) {
       setState(() {
         //log("[Find][refresh] $event");
         aStep = event;
@@ -99,6 +126,7 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
 
   void generateDatas(String algor) {
     switch (algor) {
+      case 'QuickSort':
       case 'BubbleSort':
         datas = List.generate(30, (index) => m.Random().nextInt(100) - 50);
         break;
@@ -222,8 +250,19 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
                         isToRight = null;
                       }
                     }
+
+                    Color color = Colors.blue;
                     var dataValue = datas[i];
                     var dataFrom = idxFrom < 0 ? dataValue : datas[idxFrom];
+
+                    // if (aStep?.markIndex == i) {
+                    //   if (aStep?.value == dataValue || aStep?.type == AStepType.find) {
+                    //     if (dataFrom == dataValue) color = Colors.blueAccent;
+                    //   }
+                    // }
+                    if (aStep?.type == AStepType.update && aStep?.idxs?[0] == i) {
+                      color = Colors.red;
+                    }
 
                     double itemHeight = perValueHeight * (dataValue - minValue) + minValueHeight;
                     double itemHeightFrom = perValueHeight * (dataFrom - minValue) + minValueHeight;
@@ -234,6 +273,7 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
                         sIdx = "↑";
                       }
                     }
+
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -241,6 +281,8 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
                           children: [
                             AnimPillar(
                               key: ValueKey(dataValue),
+                              duration: pillarDuration,
+                              color: color,
                               width: perValueWidth,
                               heightFrom: itemHeightFrom,
                               heightTo: itemHeight,
@@ -282,8 +324,24 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
           ),
         ),
       );
-
-      return item;
+      double lineTop = 0;
+      double lineHeigh = 1;
+      if (aStep?.markIndex != null && aStep?.value != null) {
+        double itemHeight = perValueHeight * (aStep!.value - minValue) + minValueHeight;
+        lineTop = height - itemHeight - labelHeight - contentPadding;
+      }
+      return Stack(
+        children: [
+          item,
+          Positioned(
+              top: lineTop,
+              child: Container(
+                color: Colors.green,
+                width: cs.maxWidth,
+                height: lineHeigh,
+              )),
+        ],
+      );
     });
   }
 }
