@@ -1,5 +1,5 @@
 // ignore_for_file: avoid_print
-
+//栈
 class Stack<T> {
   List<T> es = [];
 

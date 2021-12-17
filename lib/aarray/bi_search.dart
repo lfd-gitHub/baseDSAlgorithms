@@ -2,6 +2,7 @@
 
 import 'package:jdsaa/base/algorithm.dart';
 
+///二分查找
 class BiSearch with IAlgorithm {
   static final BiSearch _singleton = BiSearch._internal();
   BiSearch._internal();

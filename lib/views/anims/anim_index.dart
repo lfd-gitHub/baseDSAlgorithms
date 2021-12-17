@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:jdsaa/aarray/bi_search.dart';
 import 'package:jdsaa/base/algorithm.dart';
 import 'package:jdsaa/fsort/bubble.dart';
+import 'package:jdsaa/fsort/direct.dart';
 import 'package:jdsaa/fsort/quick.dart';
 import 'package:jdsaa/views/widgets/anim_pillar.dart';
 import 'package:rxdart/rxdart.dart';
@@ -33,7 +34,12 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
   int steps = 0; // 步数
   int menuAlgorIdx = 0; //选择的算法
   double findWhat = 0; // 查找目标值
-  List<String> supportAlgor = [(BiSearch).toString(), (BubbleSort).toString(), (QuickSort).toString()];
+  List<String> supportAlgor = [
+    (BiSearch).toString(),
+    (BubbleSort).toString(),
+    (QuickSort).toString(),
+    (DirectISort).toString(),
+  ];
   /////////////////////////////
   StreamSubscription? stepStreamSub;
 
@@ -68,18 +74,23 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
     stepStreamSub?.cancel();
     Stream<AStep>? stepStream;
     void Function(AStep)? listener;
+    var _datas = List.of(datas);
     switch (supportAlgor[menuAlgorIdx]) {
+      case 'BiSearch':
+        stepStream = BiSearch().find(_datas, findWhat);
+        listener = _searchUpdate;
+        break;
       case 'QuickSort':
-        stepStream = QuickSort().sortRange(List.of(datas), 0, datas.length - 1);
-        listener = _quickSort;
+        stepStream = QuickSort().sortRange(_datas, 0, datas.length - 1);
+        listener = _sortUpdate;
         break;
       case 'BubbleSort':
-        stepStream = BubbleSort().sort(datas);
-        listener = _bubbleSort;
+        stepStream = BubbleSort().sort(_datas);
+        listener = _sortUpdate;
         break;
-      case 'BiSearch':
-        stepStream = BiSearch().find(datas, findWhat);
-        listener = _biFind;
+      case 'DirectISort':
+        stepStream = DirectISort().sort(_datas);
+        listener = _sortUpdate;
         break;
       default:
         break;
@@ -90,41 +101,26 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
     }).listen(listener);
   }
 
-  void _quickSort(AStep event) {
+  void _sortUpdate(AStep event) {
     log("[Sort][refresh] $event");
     aStep = event;
-    if (aStep?.type == AStepType.exchange) {
+    if (aStep?.type == AStepType.done) {
+      datas = aStep!.value;
+    } else if (aStep?.type == AStepType.swap) {
       int from = aStep!.idxs![0];
       int to = aStep!.idxs![1];
       var temp = datas[from];
       datas[from] = datas[to];
       datas[to] = temp;
-    }
-    if (aStep?.type == AStepType.update) {
+    } else if (aStep?.type == AStepType.update) {
       datas[aStep!.idxs![0]] = aStep!.value;
-    }
-    if (aStep?.type == AStepType.mark) {
+    } else if (aStep?.type == AStepType.mark) {
       marked = aStep;
     }
     setState(() {});
   }
 
-  void _bubbleSort(AStep event) {
-    log("[Sort][refresh] $event");
-    aStep = event;
-    if (aStep?.type == AStepType.done) {
-      datas = aStep!.value;
-    } else if (aStep?.type == AStepType.exchange) {
-      int from = aStep!.idxs![0];
-      int to = aStep!.idxs![1];
-      var temp = datas[from];
-      datas[from] = datas[to];
-      datas[to] = temp;
-    }
-    setState(() {});
-  }
-
-  void _biFind(AStep event) {
+  void _searchUpdate(AStep event) {
     aStep = event;
     setState(() {});
   }
@@ -137,6 +133,7 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
 
   void generateDatas(String algor) {
     switch (algor) {
+      case 'DirectISort':
       case 'QuickSort':
       case 'BubbleSort':
         if (inputDatas.isNotEmpty) {
@@ -161,19 +158,7 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("STEPS = [ $steps ]"),
-        // actions: [
-        // Builder(
-        //   builder: (ctx) {
-        //     return IconButton(
-        //       onPressed: () => DataSheet.show(ctx, datas),
-        //       icon: const Icon(Icons.expand),
-        //     );
-        //   },
-        // ),
-        // ],
-      ),
+      appBar: AppBar(title: Text("STEPS = [ $steps ]")),
       body: SafeArea(
         top: false,
         bottom: true,
@@ -213,12 +198,6 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
                   ),
                 ],
               ),
-              // if (isPortal)
-              //   Expanded(
-              //       child: Padding(
-              //     padding: const EdgeInsets.all(16.0),
-              //     child: DataWidget(datas: datas),
-              //   )),
             ],
           );
         }),
@@ -257,7 +236,7 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
                   Builder(builder: (ctx) {
                     var idxFrom = -1;
                     bool? isToRight;
-                    if (aStep?.type == AStepType.exchange) {
+                    if (aStep?.type == AStepType.swap) {
                       if (i == aStep!.idxs![0]) {
                         isToRight = false;
                         idxFrom = aStep!.idxs![1];

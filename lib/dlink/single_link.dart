@@ -1,5 +1,5 @@
 // ignore_for_file: avoid_print
-
+///单链表
 class SingleLink<T> with Iterator<T> {
   SNode<T>? _root;
   int _size = 0;

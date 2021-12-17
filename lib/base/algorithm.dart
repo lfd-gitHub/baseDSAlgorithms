@@ -19,4 +19,4 @@ class AStep {
   String toString() => 'AStep(idxs: $idxs, isShowMarked: $isShowMarked, value: $value)';
 }
 
-enum AStepType { find, mark, exchange, update, done }
+enum AStepType { find, mark, swap, update, done }

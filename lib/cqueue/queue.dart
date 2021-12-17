@@ -1,5 +1,5 @@
 // ignore_for_file: avoid_print
-
+///队列
 class Queue<T> {
   List<T> es = [];
 

@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:jdsaa/base/algorithm.dart';
 
+///快速排序
 class QuickSort with IAlgorithm {
   static final QuickSort _singleton = QuickSort._internal();
   QuickSort._internal();
@@ -31,7 +32,7 @@ class QuickSort with IAlgorithm {
           logd("[CompTail] move j-- = $j");
         } else {
           datas[i] = datas[j];
-          yield AStep(type: AStepType.exchange, idxs: [i, j], isShowMarked: true);
+          yield AStep(type: AStepType.swap, idxs: [i, j], isShowMarked: true);
           i++;
           logd("[CompTail] exchange and move i++ = $i | $datas");
           break;
@@ -45,7 +46,7 @@ class QuickSort with IAlgorithm {
           logd("[CompHead] move i++ = $i");
         } else {
           datas[j] = datas[i];
-          yield AStep(type: AStepType.exchange, idxs: [i, j], isShowMarked: true);
+          yield AStep(type: AStepType.swap, idxs: [i, j], isShowMarked: true);
           j--;
           logd("[CompHead] exchange and move j-- = $j $datas");
           break;

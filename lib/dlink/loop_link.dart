@@ -1,5 +1,5 @@
 // ignore_for_file: avoid_print
-
+///单项循环链表
 class LoopLink<T> {
   LNode<T>? _head;
   int _size = 0;

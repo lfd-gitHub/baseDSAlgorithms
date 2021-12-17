@@ -1,5 +1,6 @@
 import 'package:jdsaa/base/algorithm.dart';
 
+///冒泡排序
 class BubbleSort with IAlgorithm {
   static final BubbleSort _singleton = BubbleSort._internal();
 
@@ -20,7 +21,7 @@ class BubbleSort with IAlgorithm {
           copy[j] = temp2;
           copy[j + 1] = temp1;
         }
-        yield AStep(type: hasChange ? AStepType.exchange : AStepType.find, idxs: [j, j + 1]);
+        yield AStep(type: hasChange ? AStepType.swap : AStepType.find, idxs: [j, j + 1]);
       }
     }
     yield AStep(type: AStepType.done, value: copy);

@@ -1,6 +1,6 @@
 // ignore_for_file: avoid_print
 
-///双向循环链表
+///双循环链表
 class DoubleLink<T> {
   int size = 0;
   DNode<T>? head;
