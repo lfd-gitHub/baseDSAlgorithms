@@ -17,105 +17,116 @@ class AnimIndexPage extends StatefulWidget {
 }
 
 class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
+  /////////////////////////////
   final portalHeight = 300.0;
   final contentPadding = 8.0;
   final itemSpace = 4.0;
-  late List<num> datas;
-  num maxValue = 0;
-  num minValue = 0;
-  AStep? aStep;
   final pillarDuration = const Duration(milliseconds: 100);
   final stepDuration = const Duration(milliseconds: 200);
+  /////////////////////////////
 
-  double findWhat = 0;
+  num maxValue = 0;
+  num minValue = 0;
+  List<num> datas = [];
+  AStep? marked; //标记时标记的坐标
+  AStep? aStep;
+  int steps = 0; // 步数
+  int menuAlgorIdx = 0; //选择的算法
+  double findWhat = 0; // 查找目标值
   List<String> supportAlgor = [(BiSearch).toString(), (BubbleSort).toString(), (QuickSort).toString()];
+  /////////////////////////////
+  StreamSubscription? stepStreamSub;
 
-  StreamSubscription? _stepStreamSub;
+  List<num> inputDatas = [];
 
   void onInputChange(String value) {
+    if (value.contains(",")) {
+      inputDatas = value.split(",").map((e) => num.tryParse(e) ?? 0).toList();
+    }
+    if (value.isEmpty) inputDatas = [];
     findWhat = double.tryParse(value) ?? 0;
   }
 
-  int menuAlgorIdx = 0;
   void onChangeAlgor(int idx) {
     setState(() {
-      menuAlgorIdx = idx;
+      stepStreamSub?.cancel();
+      aStep = null;
       generateDatas(supportAlgor[idx]);
+      menuAlgorIdx = idx;
     });
   }
 
   @override
   void dispose() {
-    _stepStreamSub?.cancel();
+    stepStreamSub?.cancel();
     super.dispose();
   }
 
   void startAnim() {
+    marked = null;
+    steps = 0;
+    stepStreamSub?.cancel();
+    Stream<AStep>? stepStream;
+    void Function(AStep)? listener;
     switch (supportAlgor[menuAlgorIdx]) {
       case 'QuickSort':
-        _quickSort();
+        stepStream = QuickSort().sortRange(List.of(datas), 0, datas.length - 1);
+        listener = _quickSort;
         break;
       case 'BubbleSort':
-        _bubbleSort();
+        stepStream = BubbleSort().sort(datas);
+        listener = _bubbleSort;
         break;
       case 'BiSearch':
-        _biFind();
+        stepStream = BiSearch().find(datas, findWhat);
+        listener = _biFind;
         break;
       default:
         break;
     }
+    stepStreamSub = stepStream?.interval(stepDuration).map((event) {
+      steps++;
+      return event;
+    }).listen(listener);
   }
 
-  void _quickSort() {
-    _stepStreamSub?.cancel();
-    Stream<AStep> steps = QuickSort().sortRange(List.of(datas), 0, datas.length - 1);
-    _stepStreamSub = steps.interval(stepDuration).listen((event) {
-      setState(() {
-        log("[Sort][refresh] $event");
-        aStep = event;
-        if (aStep?.isExchagne == true) {
-          int from = aStep!.idxs![0];
-          int to = aStep!.idxs![1];
-          var temp = datas[from];
-          datas[from] = datas[to];
-          datas[to] = temp;
-        }
-        if (aStep?.type == AStepType.update) {
-          datas[aStep!.idxs![0]] = aStep!.value;
-        }
-      });
-    });
+  void _quickSort(AStep event) {
+    log("[Sort][refresh] $event");
+    aStep = event;
+    if (aStep?.type == AStepType.exchange) {
+      int from = aStep!.idxs![0];
+      int to = aStep!.idxs![1];
+      var temp = datas[from];
+      datas[from] = datas[to];
+      datas[to] = temp;
+    }
+    if (aStep?.type == AStepType.update) {
+      datas[aStep!.idxs![0]] = aStep!.value;
+    }
+    if (aStep?.type == AStepType.mark) {
+      marked = aStep;
+    }
+    setState(() {});
   }
 
-  void _bubbleSort() {
-    _stepStreamSub?.cancel();
-    Stream<AStep> steps = BubbleSort().sort(datas);
-    _stepStreamSub = steps.interval(stepDuration).listen((event) {
-      setState(() {
-        log("[Sort][refresh] $event");
-        aStep = event;
-        if (aStep?.type == AStepType.result) {
-          datas = aStep!.value;
-        } else if (aStep?.isExchagne == true) {
-          int from = aStep!.idxs![0];
-          int to = aStep!.idxs![1];
-          var temp = datas[from];
-          datas[from] = datas[to];
-          datas[to] = temp;
-        }
-      });
-    });
+  void _bubbleSort(AStep event) {
+    log("[Sort][refresh] $event");
+    aStep = event;
+    if (aStep?.type == AStepType.done) {
+      datas = aStep!.value;
+    } else if (aStep?.type == AStepType.exchange) {
+      int from = aStep!.idxs![0];
+      int to = aStep!.idxs![1];
+      var temp = datas[from];
+      datas[from] = datas[to];
+      datas[to] = temp;
+    }
+    setState(() {});
   }
 
-  void _biFind() {
-    _stepStreamSub?.cancel();
-    Stream<AStep> steps = BiSearch().find(datas, findWhat);
-    _stepStreamSub = steps.interval(stepDuration).listen((event) {
-      setState(() {
-        //log("[Find][refresh] $event");
-        aStep = event;
-      });
-    });
+  void _biFind(AStep event) {
+    aStep = event;
+    setState(() {});
   }
 
   @override
@@ -128,7 +139,11 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
     switch (algor) {
       case 'QuickSort':
       case 'BubbleSort':
-        datas = List.generate(30, (index) => m.Random().nextInt(100) - 50);
+        if (inputDatas.isNotEmpty) {
+          datas = List.of(inputDatas);
+        } else if (datas.isEmpty || supportAlgor[menuAlgorIdx].toUpperCase().endsWith('SEARCH')) {
+          datas = List.generate(30, (index) => m.Random().nextInt(100) - 50);
+        }
         break;
       case 'BiSearch':
       default:
@@ -147,14 +162,16 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Find or exchange by index"),
+        title: Text("STEPS = [ $steps ]"),
         // actions: [
-        //   Builder(
-        //     builder: (ctx) => IconButton(
+        // Builder(
+        //   builder: (ctx) {
+        //     return IconButton(
         //       onPressed: () => DataSheet.show(ctx, datas),
         //       icon: const Icon(Icons.expand),
-        //     ),
-        //   ),
+        //     );
+        //   },
+        // ),
         // ],
       ),
       body: SafeArea(
@@ -175,13 +192,14 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
                   ),
                   const SizedBox(width: 8.0),
                   SizedBox(
-                    width: 100,
+                    width: MediaQuery.of(context).size.width * 0.3,
                     height: 30,
                     child: TextField(
                       onChanged: onInputChange,
                       keyboardType: TextInputType.number,
-                      //style: (decorationStyle: const InputDecoration(border: OutlineInputBorder())),
-                      decoration: const InputDecoration(border: OutlineInputBorder()),
+                      maxLines: 1,
+                      style: const TextStyle(overflow: TextOverflow.visible, fontSize: 16, height: 1.2),
+                      decoration: const InputDecoration(border: OutlineInputBorder(), contentPadding: EdgeInsets.zero),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -239,7 +257,7 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
                   Builder(builder: (ctx) {
                     var idxFrom = -1;
                     bool? isToRight;
-                    if (aStep?.isExchagne == true) {
+                    if (aStep?.type == AStepType.exchange) {
                       if (i == aStep!.idxs![0]) {
                         isToRight = false;
                         idxFrom = aStep!.idxs![1];
@@ -271,6 +289,9 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
                     if (aStep?.idxs != null) {
                       if (aStep?.idxs?.contains(i) ?? false) {
                         sIdx = "↑";
+                      }
+                      if (marked?.idxs?.first == i) {
+                        sIdx = "#";
                       }
                     }
 
@@ -326,8 +347,9 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
       );
       double lineTop = 0;
       double lineHeigh = 1;
-      if (aStep?.markIndex != null && aStep?.value != null) {
-        double itemHeight = perValueHeight * (aStep!.value - minValue) + minValueHeight;
+      if (marked?.value != null && aStep?.isShowMarked == true) {
+        var markedValue = marked!.value;
+        double itemHeight = perValueHeight * (markedValue - minValue) + minValueHeight;
         lineTop = height - itemHeight - labelHeight - contentPadding;
       }
       return Stack(

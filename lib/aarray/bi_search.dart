@@ -18,7 +18,7 @@ class BiSearch with IAlgorithm {
     while (true) {
       var cData = datas[idxCenter];
       if (cData == target) {
-        yield AStep(type: AStepType.result, value: idxCenter, idxs: [idxCenter]);
+        yield AStep(type: AStepType.done, value: idxCenter, idxs: [idxCenter]);
         return;
       } else {
         yield AStep(idxs: [idxBegin, idxCenter, idxEnd]);
@@ -29,7 +29,7 @@ class BiSearch with IAlgorithm {
         idxBegin = idxCenter + 1;
       }
       if (idxBegin > idxEnd) {
-        yield AStep(type: AStepType.result, value: -1, idxs: [-1]);
+        yield AStep(type: AStepType.done, value: -1, idxs: [-1]);
         return;
       }
       idxCenter = (idxEnd + idxBegin) ~/ 2;

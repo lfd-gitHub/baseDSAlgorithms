@@ -10,16 +10,13 @@ abstract class IAlgorithm {
 class AStep {
   AStepType type;
   List<int>? idxs;
-  int? markIndex;
-  bool isExchagne;
+  bool isShowMarked;
   dynamic value;
 
-  AStep({this.type = AStepType.find, this.idxs, this.isExchagne = false, this.value, this.markIndex});
+  AStep({this.type = AStepType.find, this.idxs, this.value, this.isShowMarked = false});
 
   @override
-  String toString() {
-    return 'AStep(type:$type,idxs: $idxs, markIndex: $markIndex, isExchagne: $isExchagne, value: $value)';
-  }
+  String toString() => 'AStep(idxs: $idxs, isShowMarked: $isShowMarked, value: $value)';
 }
 
-enum AStepType { find, exchange, result, update }
+enum AStepType { find, mark, exchange, update, done }

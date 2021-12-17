@@ -21,16 +21,17 @@ class QuickSort with IAlgorithm {
     int i = compIdx;
     int j = to;
 
+    yield AStep(type: AStepType.mark, idxs: [compIdx], value: compValue, isShowMarked: true);
     logd("[Start] base:[$compIdx/$compValue] i = $i, j = $j | ${datas.getRange(from, to + 1)}");
     while (i != j) {
       while (i != j) {
         if (datas[j] > compValue) {
-          yield AStep(idxs: [i, j], isExchagne: false, markIndex: compIdx, value: compValue);
+          yield AStep(idxs: [i, j], isShowMarked: true);
           j--;
           logd("[CompTail] move j-- = $j");
         } else {
           datas[i] = datas[j];
-          yield AStep(idxs: [i, j], isExchagne: true, markIndex: compIdx, type: AStepType.exchange, value: compValue);
+          yield AStep(type: AStepType.exchange, idxs: [i, j], isShowMarked: true);
           i++;
           logd("[CompTail] exchange and move i++ = $i | $datas");
           break;
@@ -39,12 +40,12 @@ class QuickSort with IAlgorithm {
 
       while (i != j) {
         if (datas[i] < compValue) {
-          yield AStep(idxs: [i, j], isExchagne: false, markIndex: compIdx, value: compValue);
+          yield AStep(idxs: [i, j], isShowMarked: true);
           i++;
           logd("[CompHead] move i++ = $i");
         } else {
           datas[j] = datas[i];
-          yield AStep(idxs: [i, j], isExchagne: true, markIndex: compIdx, type: AStepType.exchange, value: compValue);
+          yield AStep(type: AStepType.exchange, idxs: [i, j], isShowMarked: true);
           j--;
           logd("[CompHead] exchange and move j-- = $j $datas");
           break;
@@ -54,7 +55,7 @@ class QuickSort with IAlgorithm {
       if (i == j) {
         datas[i] = compValue;
         logd("[CompSame][$i] recurse [$from,${i - 1}] & [${i + 1},$to]  | $datas");
-        yield AStep(idxs: [i], type: AStepType.update, value: compValue, markIndex: compIdx);
+        yield AStep(type: AStepType.update, idxs: [i], value: compValue, isShowMarked: true);
         if (from < i - 1) {
           logd("[RecurseHead] ${datas.getRange(from, i)}");
           yield* sortRange(datas, from, i - 1);
