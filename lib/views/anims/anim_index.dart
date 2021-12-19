@@ -1,12 +1,12 @@
 import 'dart:async';
-import 'dart:developer';
 import 'dart:math' as m;
 import 'package:flutter/material.dart';
 import 'package:jdsaa/aarray/bi_search.dart';
 import 'package:jdsaa/base/algorithm.dart';
-import 'package:jdsaa/fsort/bubble.dart';
-import 'package:jdsaa/fsort/direct.dart';
-import 'package:jdsaa/fsort/quick.dart';
+import 'package:jdsaa/fsort/insert/shell.dart';
+import 'package:jdsaa/fsort/swap/bubble.dart';
+import 'package:jdsaa/fsort/insert/direct.dart';
+import 'package:jdsaa/fsort/swap/quick.dart';
 import 'package:jdsaa/views/widgets/anim_pillar.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -39,6 +39,7 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
     (BubbleSort).toString(),
     (QuickSort).toString(),
     (DirectISort).toString(),
+    (ShellSort).toString(),
   ];
   /////////////////////////////
   StreamSubscription? stepStreamSub;
@@ -73,7 +74,7 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
     steps = 0;
     stepStreamSub?.cancel();
     Stream<AStep>? stepStream;
-    void Function(AStep)? listener;
+    void Function(AStep)? listener = _sortUpdate;
     var _datas = List.of(datas);
     switch (supportAlgor[menuAlgorIdx]) {
       case 'BiSearch':
@@ -82,15 +83,15 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
         break;
       case 'QuickSort':
         stepStream = QuickSort().sortRange(_datas, 0, datas.length - 1);
-        listener = _sortUpdate;
         break;
       case 'BubbleSort':
         stepStream = BubbleSort().sort(_datas);
-        listener = _sortUpdate;
         break;
       case 'DirectISort':
         stepStream = DirectISort().sort(_datas);
-        listener = _sortUpdate;
+        break;
+      case 'ShellSort':
+        stepStream = ShellSort().sort(_datas);
         break;
       default:
         break;
@@ -133,6 +134,7 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
 
   void generateDatas(String algor) {
     switch (algor) {
+      case 'ShellSort':
       case 'DirectISort':
       case 'QuickSort':
       case 'BubbleSort':
@@ -289,16 +291,17 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
                               isTopIn: isToRight == null,
                               isRightIn: isToRight ?? false,
                             ),
-                            Positioned(
-                                bottom: 0,
-                                child: SizedBox(
-                                  width: perValueWidth,
-                                  child: Text(
-                                    "$dataValue",
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(color: Colors.white, fontSize: 8),
-                                  ),
-                                ))
+                            if (perValueWidth >= 10)
+                              Positioned(
+                                  bottom: 0,
+                                  child: SizedBox(
+                                    width: perValueWidth,
+                                    child: Text(
+                                      "$dataValue",
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(color: Colors.white, fontSize: 8),
+                                    ),
+                                  ))
                           ],
                         ),
                         Container(
@@ -307,7 +310,7 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
                           width: perValueWidth,
                           child: Center(
                             child: Text(
-                              "$sIdx \n $i",
+                              perValueWidth < 10 ? sIdx : "$sIdx \n $i",
                               style: const TextStyle(fontSize: 8),
                               maxLines: 2,
                               textAlign: TextAlign.center,

@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, unused_local_variable
 
 import 'dart:math';
 
@@ -23,7 +23,7 @@ class DirectISort with IAlgorithm {
         yield AStep(type: AStepType.swap, idxs: [i - 1, i]);
         logd("swrap $i <-> ${i - 1} => $datas");
         for (var j = i - 1; j > 0; j--) {
-          //find correct position at left
+          //continue find correct position at left where already sorted.
           if (datas[j - 1] > datas[j]) {
             //swap
             num temp = datas[j - 1];
@@ -31,6 +31,9 @@ class DirectISort with IAlgorithm {
             datas[j] = temp;
             logd("swrap left $j <-> ${j - 1} => $datas");
             yield AStep(type: AStepType.swap, idxs: [j - 1, j]);
+          } else {
+            logd("compare and no swap $j/${j - 1} | [${datas[j - 1]},${datas[j]}]");
+            yield AStep(type: AStepType.find, idxs: [j - 1, j]);
           }
         }
       }
@@ -42,9 +45,10 @@ void logd(s) => //
     {}; //
 //print("$s");
 
-void main(List<String> args) {
+void main(List<String> args) async {
   var datas = List.generate(10, (index) => Random().nextInt(100) - 50);
   print("sort before = $datas");
-  DirectISort().sort(datas);
+  var ss = DirectISort().sort(datas);
+  await for (var s in ss) {}
   print("sort after = $datas");
 }
