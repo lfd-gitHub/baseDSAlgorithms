@@ -15,7 +15,6 @@ class ShellSort with IAlgorithm {
     int gapSize = datas.length ~/ 2;
 
     while (gapSize >= 1) {
-      log("--------group-$gapSize");
       for (var i = gapSize; i < datas.length; i++) {
         log("--------group-$gapSize->$i");
         for (var j = i - gapSize; j >= 0; j -= gapSize) {
@@ -26,8 +25,9 @@ class ShellSort with IAlgorithm {
             log("compare and swap $j/${j + gapSize} | [${datas[j]},${datas[j + gapSize]}]");
             yield AStep(type: AStepType.swap, idxs: [j, j + gapSize]);
           } else {
-            log("compare no swap $j/${j + gapSize} | [${datas[j]},${datas[j + gapSize]}]");
+            log("break because left has sorted $j/${j + gapSize} | [${datas[j]},${datas[j + gapSize]}]");
             yield AStep(type: AStepType.find, idxs: [j, j + gapSize]);
+            break;
           }
         }
       }

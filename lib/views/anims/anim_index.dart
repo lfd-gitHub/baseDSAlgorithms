@@ -4,11 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:jdsaa/aarray/bi_search.dart';
 import 'package:jdsaa/base/algorithm.dart';
 import 'package:jdsaa/fsort/insert/shell.dart';
+import 'package:jdsaa/fsort/selection/simple.dart';
 import 'package:jdsaa/fsort/swap/bubble.dart';
 import 'package:jdsaa/fsort/insert/direct.dart';
 import 'package:jdsaa/fsort/swap/quick.dart';
 import 'package:jdsaa/views/widgets/anim_pillar.dart';
 import 'package:rxdart/rxdart.dart';
+
+typedef AlgProcessor = StreamSubscription<AStep> Function(List<num> datas, [dynamic args]);
 
 class AnimIndexPage extends StatefulWidget {
   const AnimIndexPage({Key? key}) : super(key: key);
@@ -34,14 +37,9 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
   int steps = 0; // 步数
   int menuAlgorIdx = 0; //选择的算法
   double findWhat = 0; // 查找目标值
-  List<String> supportAlgor = [
-    (BiSearch).toString(),
-    (BubbleSort).toString(),
-    (QuickSort).toString(),
-    (DirectISort).toString(),
-    (ShellSort).toString(),
-  ];
-  /////////////////////////////
+  Map<Type, AlgProcessor> supportAlgor = {};
+
+/////////////////////////////
   StreamSubscription? stepStreamSub;
 
   List<num> inputDatas = [];
@@ -58,9 +56,23 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
     setState(() {
       stepStreamSub?.cancel();
       aStep = null;
-      generateDatas(supportAlgor[idx]);
+      generateDatas(supportAlgor.keys.elementAt(idx).toString());
       menuAlgorIdx = idx;
     });
+  }
+
+  @override
+  void initState() {
+    generateDatas((BiSearch).toString());
+    supportAlgor = {
+      BiSearch: (datas, [args]) => BiSearch().find(datas, args).interval(stepDuration).listen(_searchUpdate),
+      BubbleSort: (datas, [_]) => BubbleSort().sort(datas).interval(stepDuration).listen(_sortUpdate),
+      QuickSort: (datas, [_]) => QuickSort().sortRange(datas).interval(stepDuration).listen(_sortUpdate),
+      DirectISort: (datas, [_]) => DirectISort().sort(datas).interval(stepDuration).listen(_sortUpdate),
+      ShellSort: (datas, [_]) => ShellSort().sort(datas).interval(stepDuration).listen(_sortUpdate),
+      SimpleSort: (datas, [_]) => SimpleSort().sort(datas).interval(stepDuration).listen(_sortUpdate),
+    };
+    super.initState();
   }
 
   @override
@@ -73,38 +85,13 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
     marked = null;
     steps = 0;
     stepStreamSub?.cancel();
-    Stream<AStep>? stepStream;
-    void Function(AStep)? listener = _sortUpdate;
-    var _datas = List.of(datas);
-    switch (supportAlgor[menuAlgorIdx]) {
-      case 'BiSearch':
-        stepStream = BiSearch().find(_datas, findWhat);
-        listener = _searchUpdate;
-        break;
-      case 'QuickSort':
-        stepStream = QuickSort().sortRange(_datas, 0, datas.length - 1);
-        break;
-      case 'BubbleSort':
-        stepStream = BubbleSort().sort(_datas);
-        break;
-      case 'DirectISort':
-        stepStream = DirectISort().sort(_datas);
-        break;
-      case 'ShellSort':
-        stepStream = ShellSort().sort(_datas);
-        break;
-      default:
-        break;
-    }
-    stepStreamSub = stepStream?.interval(stepDuration).map((event) {
-      steps++;
-      return event;
-    }).listen(listener);
+    stepStreamSub = supportAlgor[supportAlgor.keys.elementAt(menuAlgorIdx)]!.call(List.of(datas), findWhat);
   }
 
   void _sortUpdate(AStep event) {
     log("[Sort][refresh] $event");
     aStep = event;
+    steps++;
     if (aStep?.type == AStepType.done) {
       datas = aStep!.value;
     } else if (aStep?.type == AStepType.swap) {
@@ -123,30 +110,22 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
 
   void _searchUpdate(AStep event) {
     aStep = event;
+    steps++;
     setState(() {});
-  }
-
-  @override
-  void initState() {
-    generateDatas((BiSearch).toString());
-    super.initState();
   }
 
   void generateDatas(String algor) {
     switch (algor) {
-      case 'ShellSort':
-      case 'DirectISort':
-      case 'QuickSort':
-      case 'BubbleSort':
+      case 'BiSearch':
+        datas = List.generate(30, (index) => index);
+        break;
+      default:
         if (inputDatas.isNotEmpty) {
           datas = List.of(inputDatas);
-        } else if (datas.isEmpty || supportAlgor[menuAlgorIdx].toUpperCase().endsWith('SEARCH')) {
+        } else if (datas.isEmpty || supportAlgor.keys.elementAt(menuAlgorIdx).toString().toUpperCase().endsWith('SEARCH')) {
           datas = List.generate(30, (index) => m.Random().nextInt(100) - 50);
         }
         break;
-      case 'BiSearch':
-      default:
-        datas = List.generate(30, (index) => index);
     }
     maxValue = datas.reduce((curr, next) => curr > next ? curr : next);
     minValue = datas.reduce((curr, next) => curr < next ? curr : next);
@@ -194,7 +173,7 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
                     value: menuAlgorIdx,
                     items: [
                       for (var i = 0; i < supportAlgor.length; i++) //
-                        DropdownMenuItem<int>(child: Text(supportAlgor[i]), value: i)
+                        DropdownMenuItem<int>(child: Text(supportAlgor.keys.elementAt(i).toString()), value: i)
                     ],
                     onChanged: (int? idx) => onChangeAlgor(idx ?? 0),
                   ),
