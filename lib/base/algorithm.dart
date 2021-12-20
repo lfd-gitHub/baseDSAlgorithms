@@ -8,6 +8,8 @@ abstract class IAlgorithm {
 }
 
 class AStep {
+  static AStep done = AStep(type: AStepType.done);
+
   AStepType type;
   List<int>? idxs;
   bool isShowMarked;

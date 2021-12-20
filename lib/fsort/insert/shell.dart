@@ -33,6 +33,8 @@ class ShellSort with IAlgorithm {
       }
       gapSize = gapSize ~/ 2;
     }
+
+    yield AStep.done;
   }
 }
 

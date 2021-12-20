@@ -65,6 +65,7 @@ class QuickSort with IAlgorithm {
           logd("[RecurseTail] ${datas.getRange(i + 1, to + 1)}");
           yield* sortRange(datas, i + 1, to);
         }
+        yield AStep.done;
         return;
       }
     }

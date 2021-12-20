@@ -24,5 +24,6 @@ class SimpleSort with IAlgorithm {
         }
       }
     }
+    yield AStep.done;
   }
 }

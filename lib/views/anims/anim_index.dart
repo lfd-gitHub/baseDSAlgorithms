@@ -11,7 +11,7 @@ import 'package:jdsaa/fsort/swap/quick.dart';
 import 'package:jdsaa/views/widgets/anim_pillar.dart';
 import 'package:rxdart/rxdart.dart';
 
-typedef AlgProcessor = StreamSubscription<AStep> Function(List<num> datas, [dynamic args]);
+typedef AlgProcessor = Stream<AStep> Function(List<num> datas, [dynamic args]);
 
 class AnimIndexPage extends StatefulWidget {
   const AnimIndexPage({Key? key}) : super(key: key);
@@ -39,10 +39,11 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
   double findWhat = 0; // 查找目标值
   Map<Type, AlgProcessor> supportAlgor = {};
 
-/////////////////////////////
+  /////////////////////////////
   StreamSubscription? stepStreamSub;
-
   List<num> inputDatas = [];
+  ////////////////////////////
+  bool isPause = true;
 
   void onInputChange(String value) {
     if (value.contains(",")) {
@@ -53,24 +54,24 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
   }
 
   void onChangeAlgor(int idx) {
-    setState(() {
-      stepStreamSub?.cancel();
-      aStep = null;
-      generateDatas(supportAlgor.keys.elementAt(idx).toString());
-      menuAlgorIdx = idx;
-    });
+    stepStreamSub?.cancel();
+    aStep = null;
+    generateDatas(supportAlgor.keys.elementAt(idx));
+    menuAlgorIdx = idx;
+    isPause = true;
+    setState(() {});
   }
 
   @override
   void initState() {
-    generateDatas((BiSearch).toString());
+    generateDatas(BiSearch);
     supportAlgor = {
-      BiSearch: (datas, [args]) => BiSearch().find(datas, args).interval(stepDuration).listen(_searchUpdate),
-      BubbleSort: (datas, [_]) => BubbleSort().sort(datas).interval(stepDuration).listen(_sortUpdate),
-      QuickSort: (datas, [_]) => QuickSort().sortRange(datas).interval(stepDuration).listen(_sortUpdate),
-      DirectISort: (datas, [_]) => DirectISort().sort(datas).interval(stepDuration).listen(_sortUpdate),
-      ShellSort: (datas, [_]) => ShellSort().sort(datas).interval(stepDuration).listen(_sortUpdate),
-      SimpleSort: (datas, [_]) => SimpleSort().sort(datas).interval(stepDuration).listen(_sortUpdate),
+      BiSearch: (datas, [args]) => BiSearch().find(datas, args),
+      BubbleSort: (datas, [_]) => BubbleSort().sort(datas),
+      QuickSort: (datas, [_]) => QuickSort().sortRange(datas),
+      DirectISort: (datas, [_]) => DirectISort().sort(datas),
+      ShellSort: (datas, [_]) => ShellSort().sort(datas),
+      SimpleSort: (datas, [_]) => SimpleSort().sort(datas),
     };
     super.initState();
   }
@@ -85,15 +86,22 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
     marked = null;
     steps = 0;
     stepStreamSub?.cancel();
-    stepStreamSub = supportAlgor[supportAlgor.keys.elementAt(menuAlgorIdx)]!.call(List.of(datas), findWhat);
+    isPause = !isPause;
+    setState(() {});
+    if (isPause) return;
+    stepStreamSub = supportAlgor[supportAlgor.keys.elementAt(menuAlgorIdx)]!
+        .call(List.of(datas), findWhat) //
+        .interval(stepDuration)
+        .listen(_stepUpdate); //
   }
 
-  void _sortUpdate(AStep event) {
+  void _stepUpdate(AStep event) {
     log("[Sort][refresh] $event");
     aStep = event;
     steps++;
     if (aStep?.type == AStepType.done) {
-      datas = aStep!.value;
+      if (aStep!.value is List) datas = aStep!.value;
+      isPause = true;
     } else if (aStep?.type == AStepType.swap) {
       int from = aStep!.idxs![0];
       int to = aStep!.idxs![1];
@@ -108,15 +116,9 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
     setState(() {});
   }
 
-  void _searchUpdate(AStep event) {
-    aStep = event;
-    steps++;
-    setState(() {});
-  }
-
-  void generateDatas(String algor) {
+  void generateDatas(Type algor) {
     switch (algor) {
-      case 'BiSearch':
+      case BiSearch:
         datas = List.generate(30, (index) => index);
         break;
       default:
@@ -153,8 +155,8 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
                   const SizedBox(width: 8.0),
                   OutlinedButton.icon(
                     onPressed: startAnim,
-                    icon: const Icon(Icons.play_circle_outline_sharp),
-                    label: const Text("开始 "),
+                    icon: Icon(isPause ? Icons.play_circle_outline_sharp : Icons.pause_circle_outline),
+                    label: Text(isPause ? "开始 " : "暂停"),
                   ),
                   const SizedBox(width: 8.0),
                   SizedBox(

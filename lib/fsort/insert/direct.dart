@@ -38,6 +38,7 @@ class DirectISort with IAlgorithm {
         }
       }
     }
+    yield AStep.done;
   }
 }
 
