@@ -8,19 +8,17 @@ class SimpleSort with IAlgorithm {
   factory SimpleSort() => _singleton;
 
   @override
-  Stream<AStep> sort(List<num> datas) async* {
-    int n = datas.length;
-    for (var i = 0; i < n; i++) {
+  Stream<AStep> sortRange(List<num> datas, [int from = 0, int to = 0]) async* {
+    int len = to - from;
+    for (var i = from; i < len; i++) {
       var temp = datas[i];
       //find smallest from last area
-      for (var j = i + 1; j < n; j++) {
+      for (var j = i + 1; j < len; j++) {
         if (temp > datas[j]) {
           datas[i] = datas[j];
           datas[j] = temp;
           temp = datas[i];
           yield AStep(type: AStepType.swap, idxs: [i, j]);
-        } else {
-          yield AStep(type: AStepType.find, idxs: [i, j]);
         }
       }
     }

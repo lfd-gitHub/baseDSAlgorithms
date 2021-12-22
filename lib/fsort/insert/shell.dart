@@ -11,13 +11,14 @@ class ShellSort with IAlgorithm {
   factory ShellSort() => _singleton;
 
   @override
-  Stream<AStep> sort(List<num> datas) async* {
-    int gapSize = datas.length ~/ 2;
+  Stream<AStep> sortRange(List<num> datas, [int from = 0, int to = 0]) async* {
+    int len = to - from;
+    int gapSize = len ~/ 2;
 
     while (gapSize >= 1) {
-      for (var i = gapSize; i < datas.length; i++) {
-        log("--------group-$gapSize->$i");
-        for (var j = i - gapSize; j >= 0; j -= gapSize) {
+      for (var i = gapSize + from; i < len; i++) {
+        log("[group] @$gapSize->$i");
+        for (var j = i - gapSize; j >= from; j -= gapSize) {
           var temp = datas[j];
           if (temp > datas[j + gapSize]) {
             datas[j] = datas[j + gapSize];

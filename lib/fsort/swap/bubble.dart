@@ -10,21 +10,20 @@ class BubbleSort with IAlgorithm {
 
   ///
   @override
-  Stream<AStep> sort(List<num> datas) async* {
-    List<num> copy = List.of(datas);
-    for (int i = 0; i < datas.length - 1; i++) {
-      for (var j = 0; j < datas.length - i - 1; j++) {
-        num temp1 = copy[j];
-        num temp2 = copy[j + 1];
+  Stream<AStep> sortRange(List<num> datas, [int from = 0, int to = 0]) async* {
+    for (var i = from; i < to - 1; i++) {
+      for (var j = from; j < to - i - 1; j++) {
+        num temp1 = datas[j];
+        num temp2 = datas[j + 1];
         bool hasChange = false;
         if (hasChange = (temp1 > temp2)) {
-          copy[j] = temp2;
-          copy[j + 1] = temp1;
+          datas[j] = temp2;
+          datas[j + 1] = temp1;
         }
         yield AStep(type: hasChange ? AStepType.swap : AStepType.find, idxs: [j, j + 1]);
       }
     }
-    yield AStep(type: AStepType.done, value: copy);
+    yield AStep.done;
   }
 }
 

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:jdsaa/aarray/bi_search.dart';
 import 'package:jdsaa/base/algorithm.dart';
 import 'package:jdsaa/fsort/insert/shell.dart';
+import 'package:jdsaa/fsort/merge.dart';
 import 'package:jdsaa/fsort/selection/simple.dart';
 import 'package:jdsaa/fsort/swap/bubble.dart';
 import 'package:jdsaa/fsort/insert/direct.dart';
@@ -65,14 +66,10 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
   @override
   void initState() {
     generateDatas(BiSearch);
-    supportAlgor = {
-      BiSearch: (datas, [args]) => BiSearch().find(datas, args),
-      BubbleSort: (datas, [_]) => BubbleSort().sort(datas),
-      QuickSort: (datas, [_]) => QuickSort().sortRange(datas),
-      DirectISort: (datas, [_]) => DirectISort().sort(datas),
-      ShellSort: (datas, [_]) => ShellSort().sort(datas),
-      SimpleSort: (datas, [_]) => SimpleSort().sort(datas),
-    };
+    var findAlgors = [BiSearch()];
+    supportAlgor.addEntries(findAlgors.map((e) => MapEntry(e.runtimeType, (datas, [args]) => e.find(datas, args))));
+    var sortAlgors = [BubbleSort(), QuickSort(), DirectISort(), ShellSort(), SimpleSort(), MergeSort()];
+    supportAlgor.addEntries(sortAlgors.map((e) => MapEntry(e.runtimeType, (datas, [args]) => e.sort(datas))));
     super.initState();
   }
 

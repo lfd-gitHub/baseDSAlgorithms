@@ -1,10 +1,16 @@
-///
-///
-///
 abstract class IAlgorithm {
   Stream<AStep> find(List<num> datas, num target) => throw 'not implement';
-  Stream<AStep> sort(List<num> datas) => throw 'not implement';
+  Stream<AStep> sort(List<num> datas) => sortRange(datas, 0, datas.length);
   Stream<AStep> sortRange(List<num> datas, [int from = 0, int to = 0]) => throw 'not implement';
+}
+
+// ignore_for_file: avoid_print
+void logd(String msg) => print(msg);
+
+void swap(List<num> datas, int left, int right) {
+  var temp = datas[right];
+  datas[right] = datas[left];
+  datas[left] = temp;
 }
 
 class AStep {

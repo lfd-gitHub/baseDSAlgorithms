@@ -10,20 +10,15 @@ class QuickSort with IAlgorithm {
 
   factory QuickSort() => _singleton;
 
-  // @override
-  // Stream<AStep> sort(List<num> datas) {
-
-  // }
-
   @override
   Stream<AStep> sortRange(List<num> datas, [int from = 0, int to = 0]) async* {
     int compIdx = from;
     var compValue = datas[from];
     int i = compIdx;
-    int j = to;
+    int j = to - 1;
 
     yield AStep(type: AStepType.mark, idxs: [compIdx], value: compValue, isShowMarked: true);
-    logd("[Start] base:[$compIdx/$compValue] i = $i, j = $j | ${datas.getRange(from, to + 1)}");
+    logd("[Start] base:[$compIdx/$compValue] i = $i, j = $j | ${datas.getRange(from, to)}");
     while (i != j) {
       while (i != j) {
         if (datas[j] > compValue) {
@@ -58,11 +53,11 @@ class QuickSort with IAlgorithm {
         logd("[CompSame][$i] recurse [$from,${i - 1}] & [${i + 1},$to]  | $datas");
         yield AStep(type: AStepType.update, idxs: [i], value: compValue, isShowMarked: true);
         if (from < i - 1) {
-          logd("[RecurseHead] ${datas.getRange(from, i)}");
-          yield* sortRange(datas, from, i - 1);
+          logd("[RecurseHead] ${datas.getRange(from, i + 1)}");
+          yield* sortRange(datas, from, i);
         }
-        if (i + 1 < to) {
-          logd("[RecurseTail] ${datas.getRange(i + 1, to + 1)}");
+        if (i + 1 < to - 1) {
+          logd("[RecurseTail] ${datas.getRange(i + 1, to)}");
           yield* sortRange(datas, i + 1, to);
         }
         yield AStep.done;
@@ -75,10 +70,10 @@ class QuickSort with IAlgorithm {
 void logd(String msg) => print(msg);
 
 void main(List<String> args) async {
-  var datas = List.generate(100, (index) => Random().nextInt(1000) - 500);
+  var datas = List.generate(30, (index) => Random().nextInt(1000) - 500);
   // QuickSort().sortRange(datas, 0, datas.length - 1);
   print("datas $datas");
-  var ss = QuickSort().sortRange(datas, 0, datas.length - 1);
+  var ss = QuickSort().sort(datas);
   await for (var item in ss) {
     print("result = $datas");
     print("step = $item");
