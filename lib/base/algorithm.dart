@@ -18,13 +18,14 @@ class AStep {
 
   AStepType type;
   List<int>? idxs;
+  List<num>? values;
   bool isShowMarked;
   dynamic value;
 
-  AStep({this.type = AStepType.find, this.idxs, this.value, this.isShowMarked = false});
+  AStep({this.type = AStepType.find, this.idxs, this.value, this.isShowMarked = false, this.values});
 
   @override
   String toString() => 'AStep(idxs: $idxs, isShowMarked: $isShowMarked, value: $value)';
 }
 
-enum AStepType { find, mark, swap, update, done }
+enum AStepType { find, mark, swap, update, done, fillStart, fillOver, filling }

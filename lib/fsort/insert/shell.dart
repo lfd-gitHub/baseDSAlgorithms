@@ -39,7 +39,7 @@ class ShellSort with IAlgorithm {
   }
 }
 
-void log(String msg) => {}; //print(msg);
+void log(String msg) => print(msg);
 
 void main(List<String> args) async {
   var list = List.generate(10, (index) => Random().nextInt(100) - 50);

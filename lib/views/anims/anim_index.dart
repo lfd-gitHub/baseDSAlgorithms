@@ -35,6 +35,7 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
   List<num> datas = [];
   AStep? marked; //标记时标记的坐标
   AStep? aStep;
+  AStep? aFilled;
   int steps = 0; // 步数
   int menuAlgorIdx = 0; //选择的算法
   double findWhat = 0; // 查找目标值
@@ -57,6 +58,7 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
   void onChangeAlgor(int idx) {
     stepStreamSub?.cancel();
     aStep = null;
+    aFilled = null;
     generateDatas(supportAlgor.keys.elementAt(idx));
     menuAlgorIdx = idx;
     isPause = true;
@@ -109,6 +111,12 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
       datas[aStep!.idxs![0]] = aStep!.value;
     } else if (aStep?.type == AStepType.mark) {
       marked = aStep;
+    } else if (aStep?.type == AStepType.fillStart) {
+      aFilled = aStep;
+    } else if (aStep?.type == AStepType.fillOver) {
+      aFilled = null;
+    } else if (aStep?.type == AStepType.filling) {
+      datas[aStep!.idxs!.first] = aStep!.value;
     }
     setState(() {});
   }
@@ -244,6 +252,13 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
                     double itemHeight = perValueHeight * (dataValue - minValue) + minValueHeight;
                     double itemHeightFrom = perValueHeight * (dataFrom - minValue) + minValueHeight;
 
+                    if (aFilled != null && i < aFilled!.idxs!.last && i >= aFilled!.idxs!.first) {
+                      if (aStep?.type == AStepType.filling && aStep!.idxs!.first < i) {
+                        itemHeight = 0;
+                        itemHeightFrom = 0;
+                      }
+                    }
+
                     var sIdx = "";
                     if (aStep?.idxs != null) {
                       if (aStep?.idxs?.contains(i) ?? false) {
@@ -279,7 +294,7 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(color: Colors.white, fontSize: 8),
                                     ),
-                                  ))
+                                  )),
                           ],
                         ),
                         Container(
