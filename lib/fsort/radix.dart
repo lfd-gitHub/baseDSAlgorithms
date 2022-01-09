@@ -14,7 +14,6 @@ class RadixSort with IAlgorithm {
   @override
   Stream<AStep> sortRange(List<num> datas, [int from = 0, int to = 0]) async* {
     log("[$sTAG] ");
-    //① 最大位数
     num maxValue = datas[from];
     for (var item in datas) {
       if (maxValue < item) maxValue = item;
