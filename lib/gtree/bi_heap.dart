@@ -5,7 +5,7 @@ import 'package:jdsaa/gtree/bi_tree.dart';
 import 'package:jdsaa/gtree/tree_node.dart';
 
 void main(List<String> args) {
-  var arr = [8, 89, 61, 50, 49, 93, 29, 38, 34]; //List.generate(9, (index) => Random().nextInt(100));
+  var arr = [8, 89, 50, 50, 49, 93, 29, 38, 34]; //List.generate(9, (index) => Random().nextInt(100));
   logd("arr = $arr");
   var heap = BiMaxHeap.from(arr);
   //heap.add(12);
@@ -93,8 +93,8 @@ class BiMaxHeap<T extends Comparable> {
 
       if (childLeftValue != null) {
         if (childLeftValue.compareTo(curValue) > 0) {
-          if (childRightValue?.compareTo(childLeftValue).isNegative ?? true) {
-            //left > parent && (left > right || right == null);
+          if (childLeftValue.compareTo(childRightValue ?? childLeftValue) >= 0) {
+            //left > parent && (left >= right || right == null);
             swap(_datas, idx, childLeftIndex);
             idx = childLeftIndex;
             continue;
