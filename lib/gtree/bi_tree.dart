@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:jdsaa/fsort/insert/shell.dart';
+import 'package:jdsaa/base/algorithm.dart';
 import 'package:jdsaa/gtree/tree_node.dart';
 
 class BiTree<T> {
@@ -9,9 +9,28 @@ class BiTree<T> {
 
   bool isEmpty() => root == null;
 
+  static BiTree<T> oriConvert<T>(List<T> datas) {
+    var tree = BiTree<T>();
+    tree.root = TreeNode(value: datas[0]);
+    var nodes = [tree.root!];
+    var idx = 0;
+    var altitude = log(datas.length) ~/ log(2) + 1;
+    //logd("altitude = $altitude");
+    while (altitude-- > 0) {
+      //logd("nodes = $nodes");
+      nodes = nodes
+          .expand((e) => [
+                if (idx + 1 < datas.length) e.leftNode = TreeNode(value: datas[++idx]),
+                if (idx + 1 < datas.length) e.rightNode = TreeNode(value: datas[++idx]),
+              ])
+          .toList();
+    }
+    return tree;
+  }
+
   void completeTreeShow() {
     if (root == null) {
-      log("empty true");
+      logd("empty true");
       return;
     }
     List<TreeNode> leftNodes = [];
@@ -26,8 +45,8 @@ class BiTree<T> {
     int maxSlen = _maxSpaceLen(altitude);
     int holderSlen = _holderSLen(altitude);
     String endJoinStr = maxValueLen % 2 == 0 ? "" : "+";
-    log("{max : $altitude ,maxSlen : $maxSlen , maxValueLen : $maxValueLen , holderSlen : $holderSlen}");
-    log("-------------------------");
+    //logd("{max : $altitude ,maxSlen : $maxSlen , maxValueLen : $maxValueLen , holderSlen : $holderSlen}");
+    //logd("-------------------------");
     for (var h = 0; h < altitude; h++) {
       var layerValueCount = pow(2, h).toInt();
       var perSpaceSLen = (maxSlen - layerValueCount * holderSlen) / layerValueCount;
@@ -54,7 +73,7 @@ class BiTree<T> {
           .map((e) => e!)
           .toList();
     }
-    log("-------------------------");
+    logd("-------------------------");
   }
 
   ///最大数值的位数
@@ -133,9 +152,9 @@ class BiTree<T> {
 void main(List<String> args) async {
   var biTree = BiTree.genPerfectTree(4);
 
-  log("========complete show=========");
+  logd("========complete show=========");
   biTree.completeTreeShow();
-  log("========complete show=========");
+  logd("========complete show=========");
 
   // biTree.nlrShow();
   // log("-----");

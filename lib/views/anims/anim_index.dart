@@ -1,13 +1,15 @@
 import 'dart:async';
 import 'dart:math' as m;
+
 import 'package:flutter/material.dart';
 import 'package:jdsaa/aarray/bi_search.dart';
 import 'package:jdsaa/base/algorithm.dart';
+import 'package:jdsaa/fsort/heap.dart';
+import 'package:jdsaa/fsort/insert/direct.dart';
 import 'package:jdsaa/fsort/insert/shell.dart';
 import 'package:jdsaa/fsort/merge.dart';
 import 'package:jdsaa/fsort/selection/simple.dart';
 import 'package:jdsaa/fsort/swap/bubble.dart';
-import 'package:jdsaa/fsort/insert/direct.dart';
 import 'package:jdsaa/fsort/swap/quick.dart';
 import 'package:jdsaa/views/widgets/anim_pillar.dart';
 import 'package:rxdart/rxdart.dart';
@@ -70,7 +72,7 @@ class _AnimIndexPageState<T extends num> extends State<AnimIndexPage> {
     generateDatas(BiSearch);
     var findAlgors = [BiSearch()];
     supportAlgor.addEntries(findAlgors.map((e) => MapEntry(e.runtimeType, (datas, [args]) => e.find(datas, args))));
-    var sortAlgors = [BubbleSort(), QuickSort(), DirectISort(), ShellSort(), SimpleSort(), MergeSort()];
+    var sortAlgors = [BubbleSort(), QuickSort(), DirectISort(), ShellSort(), SimpleSort(), MergeSort(), HeapSort()];
     supportAlgor.addEntries(sortAlgors.map((e) => MapEntry(e.runtimeType, (datas, [args]) => e.sort(datas))));
     super.initState();
   }
