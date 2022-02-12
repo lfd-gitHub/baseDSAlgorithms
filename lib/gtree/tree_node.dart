@@ -1,11 +1,20 @@
 import 'dart:io';
 
+import 'package:jdsaa/gtree/tbt_node.dart';
+
 class TreeNode<T> {
   T value;
   TreeNode<T>? leftNode;
   TreeNode<T>? rightNode;
 
   TreeNode({required this.value});
+
+  TbtNode<T> toTbt() {
+    TbtNode<T> tbtNode = TbtNode(value: value);
+    tbtNode.leftNode = leftNode?.toTbt();
+    tbtNode.rightNode = rightNode?.toTbt();
+    return tbtNode;
+  }
 
   void nlrShow() {
     stdout.write(" $value");
